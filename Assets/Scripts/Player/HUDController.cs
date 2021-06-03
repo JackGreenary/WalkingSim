@@ -1,51 +1,73 @@
 using TMPro;
 using UnityEngine;
+using Michsky.UI.ModernUIPack;
 
 public class HUDController : MonoBehaviour
 {
-    public TextMeshProUGUI goalText;
+    public TextMeshProUGUI goalTextObj;
+    public TextMeshProUGUI promptTextObj;
     public GameObject goalPanel;
 
     public Transform onScreenPos;
     public Transform offScreenPos;
 
+    public ProgressBar buttonHoldProgBar;
     public bool goalShowing;
 
-    private bool showGoal;
-    private bool hideGoal;
-    private float speedMod;
+    private bool m_ShowGoal;
+    private bool m_HideGoal;
+    private float m_SpeedMod;
 
     void Start()
     {
         goalPanel.transform.position = offScreenPos.position;
         goalShowing = false;
-        goalText.text = SetGoalText(0);
+        goalTextObj.text = SetGoalText(0);
+        buttonHoldProgBar.gameObject.SetActive(false);
     }
 
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            speedMod = 1;
-            showGoal = true;
-            hideGoal = false;
+            m_SpeedMod = 1;
+            m_ShowGoal = true;
+            m_HideGoal = false;
         }
 
         if (Input.GetKeyUp(KeyCode.Q))
         {
-            speedMod = 1;
-            showGoal = false;
-            hideGoal = true;
+            m_SpeedMod = 1;
+            m_ShowGoal = false;
+            m_HideGoal = true;
         }
 
-        if (showGoal)
+        if (m_ShowGoal)
         {
             ShowGoal();
         }
-        if (hideGoal)
+        if (m_HideGoal)
         {
             HideGoal();
         }
+    }
+
+    public void UpdateButtonHoldProgBar(float percentage)
+    {
+        buttonHoldProgBar.currentPercent = percentage;
+        if (buttonHoldProgBar.currentPercent == 0)
+        {
+            buttonHoldProgBar.gameObject.SetActive(false);
+        }
+        else
+        {
+            buttonHoldProgBar.gameObject.SetActive(true);
+        }
+    }
+
+    public void ShowButtonPrompt(string promptText)
+    {
+        promptTextObj.text = promptText;
     }
 
     private void ShowGoal()
@@ -53,12 +75,12 @@ public class HUDController : MonoBehaviour
         if (Vector3.Distance(goalPanel.transform.position, onScreenPos.transform.position) > Vector3.kEpsilon)
         {
             // If not in position yet then keep on moving
-            speedMod = speedMod * 1.1f;
-            goalPanel.transform.position = Vector3.MoveTowards(goalPanel.transform.position, onScreenPos.transform.position, 8 * speedMod);
+            m_SpeedMod = m_SpeedMod * 1.1f;
+            goalPanel.transform.position = Vector3.MoveTowards(goalPanel.transform.position, onScreenPos.transform.position, 8 * m_SpeedMod);
         }
         else
         {
-            showGoal = false;
+            m_ShowGoal = false;
             goalShowing = true;
         }
     }
@@ -67,12 +89,12 @@ public class HUDController : MonoBehaviour
     {
         if (Vector3.Distance(goalPanel.transform.position, offScreenPos.transform.position) > Vector3.kEpsilon)
         {
-            speedMod = speedMod * 1.1f;
-            goalPanel.transform.position = Vector3.MoveTowards(goalPanel.transform.position, offScreenPos.transform.position, 8 * speedMod);
+            m_SpeedMod = m_SpeedMod * 1.1f;
+            goalPanel.transform.position = Vector3.MoveTowards(goalPanel.transform.position, offScreenPos.transform.position, 8 * m_SpeedMod);
         }
         else
         {
-            hideGoal = false;
+            m_HideGoal = false;
             goalShowing = false;
         }
     }

@@ -52,7 +52,7 @@ public class Interactable : MonoBehaviour
                     default:
                         break;
                 }
-                FindObjectOfType<AudioManager>().Play("Item Placed");
+                FindObjectOfType<AudioController>().Play("Item Placed");
             }
         }
     }

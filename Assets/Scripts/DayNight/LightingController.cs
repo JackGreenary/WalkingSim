@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [ExecuteAlways]
-public class LightingManager : MonoBehaviour
+public class LightingController : MonoBehaviour
 {
     [SerializeField] private Light DirectionalLight;
     [SerializeField] private LightingPreset Preset;
