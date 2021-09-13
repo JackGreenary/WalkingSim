@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PhoneController : MonoBehaviour
 {
+    public GameController gameController;
     public HUDController hudController;
     public AudioController audioManager;
     public GameObject phoneObj;
@@ -12,11 +13,14 @@ public class PhoneController : MonoBehaviour
     public bool phoneShowing;
     public bool phoneEnabled;
     public float phoneBtnHoldTimeTotal;
+    public int conversationType;
+    public bool memoryPlaying;
 
     private bool m_ShowPhone;
     private bool m_HidePhone;
     private float m_SpeedMod;
 
+    private bool m_MemoryWaiting;
     private bool m_PhoneRinging;
     private float m_PhoneRingTime;
     private float m_PhoneBtnHoldTime;
@@ -33,10 +37,64 @@ public class PhoneController : MonoBehaviour
         m_PhoneRinging = false;
         hudController = FindObjectOfType<HUDController>();
         audioManager = FindObjectOfType<AudioController>();
+        gameController = FindObjectOfType<GameController>();
     }
 
     void Update()
     {
+        // If memory is ready to be activated
+        if (m_MemoryWaiting)
+        {
+            if (hudController.promptTextObj.text == "")
+            {
+                // Show button prompt
+                hudController.ShowButtonPrompt("Hold E to remember");
+            }
+
+            // When player holds e key they will bring up the phone
+            if (Input.GetKey(KeyCode.E))
+            {
+                m_PhoneBtnHoldTime -= Time.deltaTime;
+
+                // Update HUD progress bar
+                float percentage = 100 - (m_PhoneBtnHoldTime / phoneBtnHoldTimeTotal * 100);
+                hudController.UpdateButtonHoldProgBar(percentage);
+            }
+            if (Input.GetKeyUp(KeyCode.E))
+            {
+                m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
+                hudController.UpdateButtonHoldProgBar(0);
+            }
+            if (m_PhoneBtnHoldTime <= 0)
+            {
+                // MEMORY SOUNDS HERE
+                m_SpeedMod = 1;
+                m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
+                memoryPlaying = true;
+                m_MemoryWaiting = false;
+
+                // Hide button prompt
+                hudController.ShowButtonPrompt("");
+            }
+        }
+        if (memoryPlaying)
+        {
+            // When phone showing
+            // Delay then run dialogue
+            if (m_DialogueDelay <= 0 && !m_ConversationStarted)
+            {
+                DialogueController.Instance.StartNextConversation();
+                DialogueController.Instance.SetNextConversation();
+                m_ConversationStarted = true;
+                m_DialogueDelay = .5f;
+            }
+            // Otherwise if conversation is not started, keep on with delay
+            else if (!m_ConversationStarted)
+            {
+                m_DialogueDelay -= Time.deltaTime;
+            }
+        }
+
         // When phone is enabled (ringing or being rung)
         if (m_PhoneRinging)
         {
@@ -136,18 +194,27 @@ public class PhoneController : MonoBehaviour
         m_ShowPhone = false;
         m_HidePhone = true;
         m_ConversationStarted = false;
+        gameController.CompleteCurrentEvent();
     }
 
-    public void RingPhone()
+    public void RingPhone(int convoType)
     {
-        if (!phoneShowing)
+        conversationType = convoType;
+        if (convoType == 0)
         {
-            // TODO outbound/inbound calls
-            // Different sound will play and different image will be shown on phone screen
+            if (!phoneShowing)
+            {
+                // TODO outbound/inbound calls
+                // Different sound will play and different image will be shown on phone screen
 
-            // When phone is "rung" from other class it will trigger the next dialogue
-            m_PhoneRinging = true;
-            audioManager.Play("Ringtone");
+                // When phone is "rung" from other class it will trigger the next dialogue
+                m_PhoneRinging = true;
+                audioManager.Play("Ringtone");
+            }
+        }
+        else
+        {
+            m_MemoryWaiting = true;
         }
     }
 }

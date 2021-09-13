@@ -28,7 +28,7 @@ public class Interact : FirstPersonLook
         // Check if looking at interactable object
         RaycastHit hit;
         // Does the ray intersect any objects excluding the player layer
-        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 1.5f) && hit.collider.gameObject.CompareTag("Interactable"))
+        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, 1.5f) && hit.collider.gameObject.CompareTag("Interactable") && hit.collider.gameObject.GetComponent<Interactable>().active)
         {
             Interactable interactable = hit.collider.gameObject.GetComponent<Interactable>();
             reticule.sprite = reticuleInteract;

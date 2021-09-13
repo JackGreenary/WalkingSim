@@ -36,9 +36,9 @@ public class Zoom : MonoBehaviour
         if (Input.GetKeyUp("mouse 1"))
             zoomed = !zoomed;
 
-        if (!zoomed && Camera.main.fieldOfView < maxfov)
+        if (Camera.main != null && !zoomed && Camera.main.fieldOfView < maxfov)
             Camera.main.fieldOfView++;
-        if (zoomed && Camera.main.fieldOfView > minfov)
+        if (Camera.main != null && zoomed && Camera.main.fieldOfView > minfov)
             Camera.main.fieldOfView--;
 
         //zoomAmount += Input.mouseScrollDelta.y * sensitivity * .05f;

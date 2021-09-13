@@ -4,23 +4,25 @@ using UnityEngine;
 
 public class EarplugController : MonoBehaviour
 {
+    public GameController gameController;
     public BiomassController biomassManager;
     public HUDController hudController;
     public float m_earplugBtnHoldTimeTotal;
+    public bool earplugsAreIn;
 
-    private bool m_earplugsAreIn;
     private float m_earplugBtnHoldTime;
 
     void Start()
     {
         m_earplugBtnHoldTime = m_earplugBtnHoldTimeTotal;
-        m_earplugsAreIn = false;
+        earplugsAreIn = false;
         hudController = FindObjectOfType<HUDController>();
+        gameController = FindObjectOfType<GameController>();
     }
 
     void Update()
     {
-        if (biomassManager.m_SonicEventInProg && !m_earplugsAreIn)
+        if (biomassManager.m_SonicEventInProg && !earplugsAreIn)
         {
             if(hudController.promptTextObj.text == "")
             {
@@ -45,7 +47,7 @@ public class EarplugController : MonoBehaviour
             if (m_earplugBtnHoldTime <= 0)
             {
                 m_earplugBtnHoldTime = m_earplugBtnHoldTimeTotal;
-                m_earplugsAreIn = true;
+                earplugsAreIn = true;
                 InsertEarplugs();
 
                 // Hide button prompt
@@ -56,11 +58,21 @@ public class EarplugController : MonoBehaviour
         {
             m_earplugBtnHoldTime = m_earplugBtnHoldTimeTotal;
             hudController.UpdateButtonHoldProgBar(0);
+
+            // Hide button prompt
+            hudController.ShowButtonPrompt("");
         }
     }
 
     public void InsertEarplugs()
     {
         biomassManager.MuffleSFX();
+        gameController.CompleteCurrentEvent();
+    }
+
+    public void TakeOutEarplugs()
+    {
+        biomassManager.UnMuffleSFX();
+        earplugsAreIn = false;
     }
 }

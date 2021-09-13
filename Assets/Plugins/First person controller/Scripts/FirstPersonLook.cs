@@ -9,6 +9,7 @@ public class FirstPersonLook : MonoBehaviour
     Vector2 appliedMouseDelta;
     public float sensitivity = 1;
     public float smoothing = 2;
+    public bool disableLook;
 
     void Reset()
     {
@@ -18,18 +19,26 @@ public class FirstPersonLook : MonoBehaviour
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        //disableLook = false;
     }
 
     void Update()
     {
-        // Get smooth mouse look.
-        Vector2 smoothMouseDelta = Vector2.Scale(new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")), Vector2.one * sensitivity * smoothing);
-        appliedMouseDelta = Vector2.Lerp(appliedMouseDelta, smoothMouseDelta, 1 / smoothing);
-        currentMouseLook += appliedMouseDelta;
-        currentMouseLook.y = Mathf.Clamp(currentMouseLook.y, -90, 90);
+        if (!disableLook)
+        {
+            // Get smooth mouse look.
+            Vector2 smoothMouseDelta = Vector2.Scale(new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y")), Vector2.one * sensitivity * smoothing);
+            appliedMouseDelta = Vector2.Lerp(appliedMouseDelta, smoothMouseDelta, 1 / smoothing);
+            currentMouseLook += appliedMouseDelta;
+            currentMouseLook.y = Mathf.Clamp(currentMouseLook.y, -90, 90);
 
-        // Rotate camera and controller.
-        transform.localRotation = Quaternion.AngleAxis(-currentMouseLook.y, Vector3.right);
-        character.localRotation = Quaternion.AngleAxis(currentMouseLook.x, Vector3.up);
+            // Rotate camera and controller.
+            transform.localRotation = Quaternion.AngleAxis(-currentMouseLook.y, Vector3.right);
+            character.localRotation = Quaternion.AngleAxis(currentMouseLook.x, Vector3.up);
+        }
+        else
+        {
+            transform.rotation = new Quaternion(0, 0, 0, 0);
+        }
     }
 }

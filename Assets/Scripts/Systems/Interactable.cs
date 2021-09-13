@@ -12,6 +12,11 @@ public class Interactable : MonoBehaviour
     public Material filledMaterial;
     public bool interactionDone;
     public int interactType;
+    public HUDController hudController;
+    public int readableId;
+
+    public GameController gameController;
+    public bool active;
 
     private float holdTime;
 
@@ -19,12 +24,13 @@ public class Interactable : MonoBehaviour
     {
         holdTime = holdTimeDefault;
         interactionDone = false;
-        GetComponent<MeshRenderer>().material = outlineMaterial;
+        //GetComponent<MeshRenderer>().material = outlineMaterial;
+        hudController = FindObjectOfType<HUDController>();
     }
 
     void Update()
     {
-        if (hovered && !interactionDone)
+        if (active && hovered && !interactionDone)
         {
             if (Input.GetMouseButton(0))
             {
@@ -41,17 +47,34 @@ public class Interactable : MonoBehaviour
                 interactionDone = true;
                 switch (interactType)
                 {
-                    // Deploying
-                    case 0:
+                    case 0: // Deploying
                         GetComponent<MeshRenderer>().material = filledMaterial;
                         break;
-                    // Picking up
-                    case 1:
+                    case 1: // Picking up
+                        interactionDone = false;
+                        gameController.CompleteCurrentEvent();
                         Destroy(gameObject);
+                        break;
+                    case 2: // Read
+                        if (!GetComponent<Collectible>().found)
+                        {
+                            if(hudController == null)
+                            {
+                                hudController = FindObjectOfType<HUDController>();
+                            }
+                            hudController.ShowReadable(readableId);
+                            interactionDone = false;
+                            GetComponent<Collectible>().CollectibleFound();
+                        }
+                        break;
+                    case 3: // Continue
+                        gameController.NextLocation();
+                        //gameController.ActivateContinue();
                         break;
                     default:
                         break;
                 }
+                // TODO make better
                 FindObjectOfType<AudioController>().Play("Item Placed");
             }
         }

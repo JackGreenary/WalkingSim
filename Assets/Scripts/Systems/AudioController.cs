@@ -68,8 +68,11 @@ public class AudioController : MonoBehaviour
             AudioSource[] sources = FindObjectsOfType<AudioSource>();
             foreach (AudioSource aS in sources)
             {
-                aS.volume = .25f;
-                aS.pitch = .5f;
+                if (aS.clip != null && !aS.clip.name.Contains("Music"))
+                {
+                    aS.volume = .25f;
+                    aS.pitch = .5f;
+                }
             }
         }
         else
@@ -84,9 +87,23 @@ public class AudioController : MonoBehaviour
             AudioSource[] sources = FindObjectsOfType<AudioSource>();
             foreach (AudioSource aS in sources)
             {
-                aS.volume = 1f;
-                aS.pitch = 1f;
+                if (aS.clip != null && !aS.clip.name.Contains("Music"))
+                {
+                    aS.volume = 1f;
+                    aS.pitch = 1f;
+                }
             }
         }
+    }
+
+    public void PlaybackgroundMusic(string name)
+    {
+        Sound s = Array.Find(sounds, sound => sound.name == name);
+        if (s == null)
+        {
+            Debug.Log("Sound: " + name + " was not found.");
+            return;
+        }
+        s.source.Play();
     }
 }

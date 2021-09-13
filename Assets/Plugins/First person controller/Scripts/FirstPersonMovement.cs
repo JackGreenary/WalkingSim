@@ -13,6 +13,7 @@ public class FirstPersonMovement : MonoBehaviour
     public KeyCode runningKey = KeyCode.LeftShift;
     /// <summary> Functions to override movement speed. Will use the last added override. </summary>
     public List<System.Func<float>> speedOverrides = new List<System.Func<float>>();
+    public bool controlsEnabled;
 
 
     void FixedUpdate()
@@ -22,8 +23,11 @@ public class FirstPersonMovement : MonoBehaviour
         float movingSpeed = IsRunning ? runSpeed : speed;
         if (speedOverrides.Count > 0)
             movingSpeed = speedOverrides[speedOverrides.Count - 1]();
-        velocity.y = Input.GetAxis("Vertical") * movingSpeed * Time.deltaTime;
-        velocity.x = Input.GetAxis("Horizontal") * movingSpeed * Time.deltaTime;
-        transform.Translate(velocity.x, 0, velocity.y);
+        if (controlsEnabled)
+        {
+            velocity.y = Input.GetAxis("Vertical") * movingSpeed * Time.deltaTime;
+            velocity.x = Input.GetAxis("Horizontal") * movingSpeed * Time.deltaTime;
+            transform.Translate(velocity.x, 0, velocity.y);
+        }
     }
 }
