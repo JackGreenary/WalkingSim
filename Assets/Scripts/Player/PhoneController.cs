@@ -42,127 +42,133 @@ public class PhoneController : MonoBehaviour
 
     void Update()
     {
-        // If memory is ready to be activated
-        if (m_MemoryWaiting)
+        if (conversationType == 1)
         {
-            if (hudController.promptTextObj.text == "")
+
+            // If memory is ready to be activated
+            if (m_MemoryWaiting)
             {
-                // Show button prompt
-                hudController.ShowButtonPrompt("Hold E to remember");
+                if (hudController.promptTextObj.text == "")
+                {
+                    // Show button prompt
+                    hudController.ShowButtonPrompt("Hold E to remember");
+                }
+
+                // When player holds e key they will bring up the phone
+                if (Input.GetKey(KeyCode.E))
+                {
+                    m_PhoneBtnHoldTime -= Time.deltaTime;
+
+                    // Update HUD progress bar
+                    float percentage = 100 - (m_PhoneBtnHoldTime / phoneBtnHoldTimeTotal * 100);
+                    hudController.UpdateButtonHoldProgBar(percentage);
+                }
+                if (Input.GetKeyUp(KeyCode.E))
+                {
+                    m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
+                    hudController.UpdateButtonHoldProgBar(0);
+                }
+                if (m_PhoneBtnHoldTime <= 0)
+                {
+                    audioManager.Play("Flashback In");
+                    m_SpeedMod = 1;
+                    m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
+                    memoryPlaying = true;
+                    m_MemoryWaiting = false;
+
+                    // Hide button prompt
+                    hudController.ShowButtonPrompt("");
+                }
             }
-
-            // When player holds e key they will bring up the phone
-            if (Input.GetKey(KeyCode.E))
+            if (memoryPlaying)
             {
-                m_PhoneBtnHoldTime -= Time.deltaTime;
+                // When phone showing
+                // Delay then run dialogue
+                if (m_DialogueDelay <= 0 && !m_ConversationStarted)
+                {
+                    DialogueController.Instance.StartNextConversation();
+                    DialogueController.Instance.SetNextConversation();
+                    m_ConversationStarted = true;
+                    m_DialogueDelay = .5f;
+                }
+                // Otherwise if conversation is not started, keep on with delay
+                else if (!m_ConversationStarted)
+                {
+                    m_DialogueDelay -= Time.deltaTime;
+                }
+            }
+        }
+        else
+        {
+            // When phone is enabled (ringing or being rung)
+            if (m_PhoneRinging)
+            {
+                if (hudController.promptTextObj.text == "")
+                {
+                    // Show button prompt
+                    hudController.ShowButtonPrompt("Hold E to answer phone");
+                }
 
-                // Update HUD progress bar
-                float percentage = 100 - (m_PhoneBtnHoldTime / phoneBtnHoldTimeTotal * 100);
-                hudController.UpdateButtonHoldProgBar(percentage);
+                // When player holds e key they will bring up the phone
+                if (Input.GetKey(KeyCode.E))
+                {
+                    m_PhoneBtnHoldTime -= Time.deltaTime;
+
+                    // Update HUD progress bar
+                    float percentage = 100 - (m_PhoneBtnHoldTime / phoneBtnHoldTimeTotal * 100);
+                    hudController.UpdateButtonHoldProgBar(percentage);
+                }
+                if (Input.GetKeyUp(KeyCode.E))
+                {
+                    m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
+                    hudController.UpdateButtonHoldProgBar(0);
+                }
+                if (m_PhoneBtnHoldTime <= 0)
+                {
+                    audioManager.Stop("Ringtone");
+                    audioManager.Play("Pickup Call");
+                    m_PhoneRinging = false;
+                    m_SpeedMod = 1;
+                    m_ShowPhone = true;
+                    m_HidePhone = false;
+                    m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
+
+                    // Hide button prompt
+                    hudController.ShowButtonPrompt("");
+                }
+            }
+            else if (m_ShowPhone)
+            {
+                ShowHidePhone(true);
+            }
+            else if (!m_HidePhone && phoneShowing)
+            {
+                // When phone showing
+                // Delay then run dialogue
+                if (m_DialogueDelay <= 0 && !m_ConversationStarted)
+                {
+                    DialogueController.Instance.StartNextConversation();
+                    DialogueController.Instance.SetNextConversation();
+                    m_ConversationStarted = true;
+                    m_DialogueDelay = .5f;
+                }
+                // Otherwise if conversation is not started, keep on with delay
+                else if (!m_ConversationStarted)
+                {
+                    m_DialogueDelay -= Time.deltaTime;
+                }
+            }
+            // If we want to hide phone then run the method to do so
+            if (m_HidePhone)
+            {
+                ShowHidePhone(false);
+                audioManager.Play("Hangup Call");
             }
             if (Input.GetKeyUp(KeyCode.E))
             {
                 m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
                 hudController.UpdateButtonHoldProgBar(0);
             }
-            if (m_PhoneBtnHoldTime <= 0)
-            {
-                // MEMORY SOUNDS HERE
-                m_SpeedMod = 1;
-                m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
-                memoryPlaying = true;
-                m_MemoryWaiting = false;
-
-                // Hide button prompt
-                hudController.ShowButtonPrompt("");
-            }
-        }
-        if (memoryPlaying)
-        {
-            // When phone showing
-            // Delay then run dialogue
-            if (m_DialogueDelay <= 0 && !m_ConversationStarted)
-            {
-                DialogueController.Instance.StartNextConversation();
-                DialogueController.Instance.SetNextConversation();
-                m_ConversationStarted = true;
-                m_DialogueDelay = .5f;
-            }
-            // Otherwise if conversation is not started, keep on with delay
-            else if (!m_ConversationStarted)
-            {
-                m_DialogueDelay -= Time.deltaTime;
-            }
-        }
-
-        // When phone is enabled (ringing or being rung)
-        if (m_PhoneRinging)
-        {
-            if (hudController.promptTextObj.text == "")
-            {
-                // Show button prompt
-                hudController.ShowButtonPrompt("Hold E to answer phone");
-            }
-
-            // When player holds e key they will bring up the phone
-            if (Input.GetKey(KeyCode.E))
-            {
-                m_PhoneBtnHoldTime -= Time.deltaTime;
-
-                // Update HUD progress bar
-                float percentage = 100 - (m_PhoneBtnHoldTime / phoneBtnHoldTimeTotal * 100);
-                hudController.UpdateButtonHoldProgBar(percentage);
-            }
-            if (Input.GetKeyUp(KeyCode.E))
-            {
-                m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
-                hudController.UpdateButtonHoldProgBar(0);
-            }
-            if (m_PhoneBtnHoldTime <= 0)
-            {
-                audioManager.Stop("Ringtone");
-                audioManager.Play("Pickup Call");
-                m_PhoneRinging = false;
-                m_SpeedMod = 1;
-                m_ShowPhone = true;
-                m_HidePhone = false;
-                m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
-
-                // Hide button prompt
-                hudController.ShowButtonPrompt("");
-            }
-        }
-        else if (m_ShowPhone)
-        {
-            ShowHidePhone(true);
-        }
-        else if (!m_HidePhone && phoneShowing)
-        {
-            // When phone showing
-            // Delay then run dialogue
-            if (m_DialogueDelay <= 0 && !m_ConversationStarted)
-            {
-                DialogueController.Instance.StartNextConversation();
-                DialogueController.Instance.SetNextConversation();
-                m_ConversationStarted = true;
-                m_DialogueDelay = .5f;
-            }
-            // Otherwise if conversation is not started, keep on with delay
-            else if (!m_ConversationStarted)
-            {
-                m_DialogueDelay -= Time.deltaTime;
-            }
-        }
-        // If we want to hide phone then run the method to do so
-        if (m_HidePhone)
-        {
-            ShowHidePhone(false);
-            audioManager.Play("Hangup Call");
-        }
-        if (Input.GetKeyUp(KeyCode.E))
-        {
-            m_PhoneBtnHoldTime = phoneBtnHoldTimeTotal;
-            hudController.UpdateButtonHoldProgBar(0);
         }
     }
 
@@ -191,6 +197,11 @@ public class PhoneController : MonoBehaviour
     }
     public void OnConversationEnd(Transform actor)
     {
+        if (conversationType == 1)
+        {
+            memoryPlaying = false;
+            audioManager.Play("Flashback Out");
+        }
         m_ShowPhone = false;
         m_HidePhone = true;
         m_ConversationStarted = false;

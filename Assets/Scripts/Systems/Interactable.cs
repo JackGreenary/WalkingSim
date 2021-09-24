@@ -53,6 +53,8 @@ public class Interactable : MonoBehaviour
                     case 1: // Picking up
                         interactionDone = false;
                         gameController.CompleteCurrentEvent();
+                        // TODO make better
+                        FindObjectOfType<AudioController>().Play("Item Placed");
                         Destroy(gameObject);
                         break;
                     case 2: // Read
@@ -65,6 +67,7 @@ public class Interactable : MonoBehaviour
                             hudController.ShowReadable(readableId);
                             interactionDone = false;
                             GetComponent<Collectible>().CollectibleFound();
+                            FindObjectOfType<AudioController>().Play("Paper Rustle");
                         }
                         break;
                     case 3: // Continue
@@ -74,8 +77,6 @@ public class Interactable : MonoBehaviour
                     default:
                         break;
                 }
-                // TODO make better
-                FindObjectOfType<AudioController>().Play("Item Placed");
             }
         }
     }
